@@ -14,7 +14,8 @@
     "prod:down": "docker compose -f deployments/docker-compose.prod.yaml down",
     "build": "docker compose -f deployments/docker-compose.prod.yaml build",
     "export:detatched": "docker save -o docker-images.tar $(docker compose -f deployments/docker-compose.prod.yaml config --images)",
-    "export:current": "pnpm run build && pnpm run export:detatched"
+    "export:current": "pnpm run build && pnpm run export:detatched",
+    "cleanup": "rm -rf node_modules apps/**/node_modules packages/**/node_modules pnpm-lock.yaml apps/**/pnpm-lock.yaml packages/**/pnpm-lock.yaml"
   },
   "keywords": [],
   "author": "",
