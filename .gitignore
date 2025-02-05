@@ -1,23 +1,23 @@
 # Global
-docker-images.tar
-node_modules
-.pnp
-.pnp.*
-.yarn
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-.pnpm-store
-*.pem
-.DS_Store
-logs
-*.log
-.tmp
-.vscode
-*.sublime-workspace
-*.launch
-*.env.*
+**/docker-images.tar
+**/node_modules
+**/.pnp
+**/.pnp.*
+**/.yarn
+**/!.yarn/patches
+**/!.yarn/plugins
+**/!.yarn/releases
+**/!.yarn/versions
+**/.pnpm-store
+**/*.pem
+**/.DS_Store
+**/logs
+**/*.log
+**/.tmp
+**/.vscode
+**/*.sublime-workspace
+**/*.launch
+**/*.env.*
 
 # Frontend
 /apps/frontend/.next
