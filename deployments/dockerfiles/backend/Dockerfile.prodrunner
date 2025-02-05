@@ -11,6 +11,7 @@ ENV P=./packages
 FROM base AS init
 WORKDIR /app
 RUN apk update
+RUN npm i -g corepack@latest
 RUN corepack enable pnpm
 
 # Install dependencies for apps and packages
