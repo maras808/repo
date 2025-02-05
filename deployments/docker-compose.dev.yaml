@@ -1,0 +1,44 @@
+services:
+  frontend_dev:
+    build:
+      context: ../.
+      dockerfile: deployments/dockerfiles/frontend/Dockerfile.devshell
+      cache_to:
+        - type=inline
+    ports:
+      - 3000:3000
+      - 5555:5555
+    volumes:
+      - ../apps/frontend:/app/apps/frontend
+      - ../packages:/app/packages
+      - ../pnpm-workspace.yaml:/app/pnpm-workspace.yaml
+    command: sh -c "cd apps/frontend && pnpm install && pnpm run dev"
+  backend_dev:
+    build:
+      context: ../.
+      dockerfile: deployments/dockerfiles/backend/Dockerfile.devshell
+      cache_to:
+        - type=inline
+    ports:
+      - 3001:3001
+    volumes:
+      - ../apps/backend:/app/apps/backend
+      - ../packages:/app/packages
+      - ../pnpm-workspace.yaml:/app/pnpm-workspace.yaml
+    command: sh -c "cd apps/backend && pnpm install && pnpm run start:dev"
+  redis_dev:
+    build:
+      context: ../.
+      dockerfile: deployments/dockerfiles/redis/Dockerfile
+      cache_to:
+        - type=inline
+    ports:
+      - 3002:3002
+# Enable containerd snapshotter storage drivers
+# https://docs.docker.com/engine/storage/containerd/
+# https://docs.docker.com/build/cache/backends/inline/
+# local cache - better for multistage
+# cache_from:
+#   - type=local,src=./.docker-cache
+# cache_to:
+#   - type=local,dest=./.docker-cache

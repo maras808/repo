@@ -1,0 +1,59 @@
+# syntax=docker/dockerfile:1.7-labs
+FROM node:20-alpine AS base
+
+# Path to service
+ENV S=./apps/frontend
+# Path to packages
+ENV P=./packages
+# These paths are important to maintain correct monorepo directory structure (pnpm-workspace.yaml)
+
+# Check if nextjs's output is set to standalone - significantly reduces size of docker images
+FROM base AS prechecker
+WORKDIR /app
+COPY ${S}/next.config.ts ./next.config.ts
+RUN if ! grep -q 'output: "standalone"' next.config.ts; then \
+    echo 'next.config.ts must contain "output: standalone"'; \
+    exit 1; \
+fi
+
+# Initialize base image
+FROM base AS init
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN apk update
+RUN corepack enable pnpm
+RUN apk add --no-cache libc6-compat
+
+# Install dependencies for apps and packages
+# Consider using pnpm.lock.yaml with --frozen-lockfile
+# Consider trimming source code from packages's COPY instruction
+# Produces root node_modules and seprate node_modules with symlinks for each app / package (this is how pnpm works)
+FROM init AS installer
+COPY pnpm-workspace.yaml ./
+COPY ${S}/package.json ${S}/
+COPY --exclude=./**/src ${P} ${P}
+RUN pnpm install -r 
+
+# Copy node_modules and build the apps / packages.
+# Maintaining correct directory structure is important due to pnpm-workspace.yaml file copied step above
+FROM init AS builder
+COPY --from=installer /app/node_modules ./node_modules
+COPY --from=installer /app/${S}/node_modules ${S}/node_modules
+COPY --from=installer /app/${P} ${P}
+COPY ${S} ${S}
+COPY ${P} ${P}
+RUN pnpm run -r build
+
+# Run the production server
+# Nextjs containes the symlinks node_modules in .next directory so it isn't necesary to copy them separately - only copy the root node_modules
+# Run the server entrypoint in app's root directory i.e. apps/frontend/entrypoint.ts
+FROM init AS runner
+ENV NODE_ENV=production
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+COPY --from=installer /app/node_modules ./node_modules
+COPY --from=builder /app/${S}/public ${S}/public
+COPY --from=builder --chown=nextjs:nodejs /app/${S}/.next/standalone ${S}/
+COPY --from=builder --chown=nextjs:nodejs /app/${S}/.next/static ${S}/.next/static
+USER nextjs
+CMD node ${S}/server.js

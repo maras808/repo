@@ -1,0 +1,24 @@
+{
+  "name": "@repo/ui",
+  "version": "1.0.0",
+  "description": "Reusable UI components",
+  "exports": {
+    "./button": {
+      "import": "./dist/button.js",
+      "require": "./dist/button.js",
+      "types": "./dist/button.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/react": "^19"
+  }
+}

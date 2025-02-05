@@ -1,0 +1,42 @@
+services:
+  frontend_prod:
+    image: repo/frontend:latest
+    pull_policy: never
+    build:
+      context: ../.
+      dockerfile: deployments/dockerfiles/frontend/Dockerfile.prodrunner
+      cache_to:
+        - type=inline
+    ports:
+      - 3000:3000
+  backend_prod:
+    image: repo/backend:latest
+    pull_policy: never
+    build:
+      context: ../.
+      dockerfile: deployments/dockerfiles/backend/Dockerfile.prodrunner
+      cache_to:
+        - type=inline
+    ports:
+      - 3001:3001
+  redis_prod:
+    image: repo/redis:latest
+    pull_policy: never
+    build:
+      context: ../.
+      dockerfile: deployments/dockerfiles/redis/Dockerfile
+      cache_to:
+        - type=inline
+    ports:
+      - 3002:3002
+# Enable containerd snapshotter storage drivers
+# https://docs.docker.com/engine/storage/containerd/
+# https://docs.docker.com/build/cache/backends/inline/
+# local cache - better for multistage
+# cache_from:
+#   - type=local,src=./.docker-cache
+# cache_to:
+#   - type=local,dest=./.docker-cache
+
+# Enable buildkit
+# remember syntax=docker/dockerfile:1.7-labs

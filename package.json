@@ -1,0 +1,22 @@
+{
+  "name": "repo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "docker compose -f deployments/docker-compose.dev.yaml up",
+    "dev:start": "docker compose -f deployments/docker-compose.dev.yaml up -d",
+    "dev:stop": "docker compose -f deployments/docker-compose.dev.yaml stop",
+    "dev:down": "docker compose -f deployments/docker-compose.dev.yaml down",
+    "prod": "docker compose -f deployments/docker-compose.prod.yaml up --build",
+    "prod:start": "docker compose -f deployments/docker-compose.prod.yaml up -d --build",
+    "prod:stop": "docker compose -f deployments/docker-compose.prod.yaml stop",
+    "prod:down": "docker compose -f deployments/docker-compose.prod.yaml down",
+    "build": "docker compose -f deployments/docker-compose.prod.yaml build",
+    "export:detatched": "docker save -o docker-images.tar $(docker compose -f deployments/docker-compose.prod.yaml config --images)",
+    "export:current": "pnpm run build && pnpm run export:detatched"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

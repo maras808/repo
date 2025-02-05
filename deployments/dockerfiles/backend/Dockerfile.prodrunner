@@ -1,0 +1,45 @@
+# syntax=docker/dockerfile:1.7-labs
+FROM node:20-alpine AS base
+
+# Path to service
+ENV S=./apps/backend
+# Path to packages
+ENV P=./packages
+# These paths are important to maintain correct monorepo directory structure (pnpm-workspace.yaml)
+
+# Initialize base image
+FROM base AS init
+WORKDIR /app
+RUN apk update
+RUN corepack enable pnpm
+
+# Install dependencies for apps and packages
+# Consifer using pnpm.lock.yaml with --frozen-lockfile
+# Consider trimming source code from packages's COPY instruction
+# Produces root node_modules and seprate node_modules with symlinks for each app / package (this is how pnpm works)
+FROM init AS installer
+COPY pnpm-workspace.yaml ./
+COPY ${S}/package.json ${S}/
+COPY ${P} ${P}
+RUN pnpm install -r
+
+# Copy node_modules and build the apps / packages.
+# Maintaining correct directory structure is important due to pnpm-workspace.yaml file copied step above
+FROM init AS builder
+COPY --from=installer /app/node_modules ./node_modules
+COPY --from=installer /app/${S}/node_modules ${S}/node_modules
+COPY --from=installer /app/${P} ${P}
+COPY ${S} ${S}
+RUN pnpm run -r build
+
+# Run the production server
+# Run the server entrypoint in app's root directory i.e. apps/frontend/entrypoint.ts
+FROM init AS runner
+ENV NODE_ENV=production
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nestjs
+COPY --from=installer /app/node_modules ./node_modules
+COPY --from=installer /app/${S}/node_modules ${S}/node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/${S}/dist ${S}/
+USER nestjs
+CMD node ${S}/main.js
