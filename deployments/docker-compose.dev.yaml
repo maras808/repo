@@ -12,7 +12,8 @@ services:
       - ../apps/frontend:/app/apps/frontend
       - ../packages:/app/packages
       - ../pnpm-workspace.yaml:/app/pnpm-workspace.yaml
-    command: sh -c "cd apps/frontend && pnpm install && pnpm run dev"
+      - ../node_modules:/app/node_modules
+    command: sh -c "pnpm run --dir=apps/frontend dev"
   backend_dev:
     build:
       context: ../.
@@ -25,7 +26,7 @@ services:
       - ../apps/backend:/app/apps/backend
       - ../packages:/app/packages
       - ../pnpm-workspace.yaml:/app/pnpm-workspace.yaml
-    command: sh -c "cd apps/backend && pnpm install && pnpm run start:dev"
+    command: sh -c "pnpm run --dir=apps/backend start:dev"
   redis_dev:
     build:
       context: ../.
