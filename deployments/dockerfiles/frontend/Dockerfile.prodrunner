@@ -21,6 +21,7 @@ FROM base AS init
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN apk update
+RUN npm i -g corepack@latest
 RUN corepack enable pnpm
 RUN apk add --no-cache libc6-compat
 
