@@ -21,7 +21,7 @@ RUN corepack enable pnpm
 FROM init AS installer
 COPY pnpm-workspace.yaml ./
 COPY ${S}/package.json ${S}/
-COPY ${P} ${P}
+COPY --exclude=./**/src ${P} ${P}
 RUN pnpm install -r
 
 # Copy node_modules and build the apps / packages.
